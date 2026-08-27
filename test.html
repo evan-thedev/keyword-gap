@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyword Gap Tests</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #4fc3f7;
+      margin-bottom: 20px;
+    }
+    
+    .test-result {
+      padding: 8px 12px;
+      margin: 4px 0;
+      border-radius: 4px;
+    }
+    
+    .pass {
+      background: #2d5016;
+      color: #a5d6a7;
+    }
+    
+    .fail {
+      background: #5c1a1a;
+      color: #ef9a9a;
+    }
+    
+    .pass::before {
+      content: "✓ ";
+      font-weight: bold;
+    }
+    
+    .fail::before {
+      content: "✗ ";
+      font-weight: bold;
+    }
+    
+    .section {
+      margin: 20px 0;
+      padding: 12px;
+      background: #2d2d2d;
+      border-radius: 4px;
+    }
+    
+    .section-title {
+      color: #ffb74d;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .summary {
+      margin-top: 30px;
+      padding: 20px;
+      background: #2d2d2d;
+      border-radius: 4px;
+      font-size: 18px;
+    }
+    
+    .summary-pass {
+      border-left: 4px solid #66bb6a;
+    }
+    
+    .summary-fail {
+      border-left: 4px solid #ef5350;
+    }
+    
+    .debug {
+      margin-left: 20px;
+      font-size: 12px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Keyword Gap Test Suite</h1>
+    <div id="output"></div>
+    <div id="summary"></div>
+  </div>
+  
+  <script src="keywords.js"></script>
+  <script>
+    let passed = 0;
+    let failed = 0;
+    const output = document.getElementById('output');
+    const summaryDiv = document.getElementById('summary');
+    
+    function assert(condition, testName) {
+      const div = document.createElement('div');
+      div.className = condition ? 'test-result pass' : 'test-result fail';
+      div.textContent = testName;
+      output.appendChild(div);
+      
+      if (condition) {
+        passed++;
+      } else {
+        failed++;
+      }
+    }
+    
+    function assertArrayEquals(arr1, arr2, testName) {
+      const equal = arr1.length === arr2.length && 
+                    arr1.every((val, idx) => val === arr2[idx]);
+      assert(equal, testName);
+      
+      if (!equal) {
+        const debug = document.createElement('div');
+        debug.className = 'debug';
+        debug.innerHTML = `Expected: [${arr2.join(', ')}]<br>Got: [${arr1.join(', ')}]`;
+        output.appendChild(debug);
+      }
+    }
+    
+    function assertSetEquals(set1, set2, testName) {
+      const equal = set1.size === set2.size &&
+                    [...set1].every(val => set2.has(val));
+      assert(equal, testName);
+      
+      if (!equal) {
+        const debug = document.createElement('div');
+        debug.className = 'debug';
+        debug.innerHTML = `Expected: [${[...set2].join(', ')}]<br>Got: [${[...set1].join(', ')}]`;
+        output.appendChild(debug);
+      }
+    }
+    
+    function section(title) {
+      const div = document.createElement('div');
+      div.className = 'section';
+      div.innerHTML = `<div class="section-title">${title}</div>`;
+      output.appendChild(div);
+    }
+    
+    // Run tests
+    section('tokenize() tests');
+    assertArrayEquals(
+      tokenize('Hello World'),
+      ['hello', 'world'],
+      'tokenize basic words'
+    );
+    
+    assertArrayEquals(
+      tokenize('JavaScript, Python & Node.js'),
+      ['javascript', 'python', 'node', 'js'],
+      'tokenize with punctuation'
+    );
+    
+    assertArrayEquals(
+      tokenize('Full-Stack Developer'),
+      ['full-stack', 'developer'],
+      'tokenize preserves hyphens'
+    );
+    
+    assertArrayEquals(
+      tokenize(''),
+      [],
+      'tokenize empty string'
+    );
+    
+    assertArrayEquals(
+      tokenize('AWS EC2 API'),
+      ['aws', 'ec2', 'api'],
+      'tokenize uppercase acronyms'
+    );
+    
+    section('filterStopwords() tests');
+    assertArrayEquals(
+      filterStopwords(['the', 'quick', 'brown', 'fox']),
+      ['quick', 'brown', 'fox'],
+      'filterStopwords removes common stopwords'
+    );
+    
+    assertArrayEquals(
+      filterStopwords(['react', 'and', 'node', 'with', 'express']),
+      ['react', 'node', 'express'],
+      'filterStopwords keeps meaningful words'
+    );
+    
+    section('getUniqueTokens() tests');
+    assertSetEquals(
+      getUniqueTokens('React React Node Node'),
+      new Set(['react', 'node']),
+      'getUniqueTokens returns unique tokens'
+    );
+    
+    assertSetEquals(
+      getUniqueTokens('The quick brown fox'),
+      new Set(['quick', 'brown', 'fox']),
+      'getUniqueTokens filters stopwords by default'
+    );
+    
+    assertSetEquals(
+      getUniqueTokens('The quick brown fox', true),
+      new Set(['the', 'quick', 'brown', 'fox']),
+      'getUniqueTokens includes stopwords when requested'
+    );
+    
+    section('findMissingKeywords() tests');
+    const resume1 = 'JavaScript Python React Node.js';
+    const jobDesc1 = 'TypeScript React Angular AWS';
+    
+    assertArrayEquals(
+      findMissingKeywords(resume1, jobDesc1),
+      ['angular', 'aws', 'typescript'],
+      'findMissingKeywords finds missing keywords'
+    );
+    
+    const resume2 = 'Senior Developer with React and Node.js experience';
+    const jobDesc2 = 'Looking for React and Node.js developer';
+    
+    assertArrayEquals(
+      findMissingKeywords(resume2, jobDesc2),
+      ['looking'],
+      'findMissingKeywords handles overlapping keywords'
+    );
+    
+    const resume3 = 'Full-stack developer';
+    const jobDesc3 = 'full-stack engineer';
+    
+    assertArrayEquals(
+      findMissingKeywords(resume3, jobDesc3),
+      ['engineer'],
+      'findMissingKeywords is case-insensitive'
+    );
+    
+    section('Realistic scenario');
+    const realResume = `
+    Senior Software Engineer
+    5 years experience with JavaScript and Python
+    Built web applications using React and Django
+    Worked with PostgreSQL databases
+    Experience with Git and Docker
+    `;
+    
+    const realJobDesc = `
+    Full Stack Engineer needed
+    Requirements:
+    - JavaScript and TypeScript experience
+    - React or Vue.js
+    - Node.js and Express
+    - MongoDB or PostgreSQL
+    - AWS cloud services
+    - Docker and Kubernetes
+    `;
+    
+    const missing = findMissingKeywords(realResume, realJobDesc);
+    const expectedMissing = ['aws', 'cloud', 'express', 'full', 'js',
+                            'kubernetes', 'mongodb', 'needed', 'node', 'requirements',
+                            'services', 'stack', 'typescript', 'vue'];
+    
+    assertArrayEquals(
+      missing,
+      expectedMissing,
+      'realistic scenario finds correct missing keywords'
+    );
+    
+    assert(
+      missing.includes('typescript') && 
+      missing.includes('kubernetes') && 
+      missing.includes('mongodb'),
+      'realistic scenario includes important technical keywords'
+    );
+    
+    assert(
+      !missing.includes('javascript') && 
+      !missing.includes('react') && 
+      !missing.includes('postgresql'),
+      'realistic scenario excludes keywords present in resume'
+    );
+    
+    section('Edge cases');
+    assert(
+      STOPWORDS.has('the') && STOPWORDS.has('and') && STOPWORDS.has('is'),
+      'STOPWORDS contains common words'
+    );
+    
+    const tokens = tokenize('test-driven development');
+    assert(
+      tokens.includes('test-driven'),
+      'tokenize preserves hyphenated compound words'
+    );
+    
+    // Display summary
+    const summaryClass = failed > 0 ? 'summary summary-fail' : 'summary summary-pass';
+    const summaryText = failed > 0 ? '❌ Some tests failed' : '✅ All tests passed!';
+    
+    summaryDiv.className = summaryClass;
+    summaryDiv.innerHTML = `
+      <div><strong>Test Results</strong></div>
+      <div>Passed: ${passed}</div>
+      <div>Failed: ${failed}</div>
+      <div>Total: ${passed + failed}</div>
+      <div style="margin-top: 12px; font-weight: bold;">${summaryText}</div>
+    `;
+  </script>
+</body>
+</html>

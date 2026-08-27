@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyword Gap - Resume vs Job Description</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 16px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 24px;
+    }
+    
+    header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .privacy-note {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      padding: 12px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 48px;
+    }
+    
+    .btn-primary {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1976D2;
+    }
+    
+    .btn-secondary {
+      background: #fff;
+      color: #666;
+      border: 2px solid #ddd;
+    }
+    
+    .btn-secondary:hover {
+      border-color: #2196F3;
+      color: #2196F3;
+    }
+    
+    .btn-payment {
+      background: #4caf50;
+      color: white;
+      margin-left: auto;
+    }
+    
+    .btn-payment:hover {
+      background: #45a049;
+    }
+    
+    .payment-placeholder-note {
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    .panes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .panes {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .pane {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .pane-header {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 16px;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 300px;
+      padding: 16px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #2196F3;
+    }
+    
+    .output {
+      background: #fafafa;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      padding: 16px;
+      min-height: 300px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    
+    mark {
+      background: #ffeb3b;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-weight: 600;
+      color: #000;
+    }
+    
+    .stats {
+      background: #f5f5f5;
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    
+    .stats-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .stat {
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+    }
+    
+    .missing-keywords {
+      margin-top: 16px;
+    }
+    
+    .missing-keywords-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    
+    .keyword-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .keyword-tag {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    footer {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+    }
+    
+    footer a {
+      color: #2196F3;
+      text-decoration: none;
+    }
+    
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Keyword Gap</h1>
+      <div class="subtitle">Find missing keywords between your resume and job descriptions</div>
+    </header>
+    
+    <div class="privacy-note">
+      🔒 <strong>100% Local & Private:</strong> Nothing you paste ever leaves your device. No AI. No backend. No tracking.
+    </div>
+    
+    <div class="controls">
+      <button class="btn-primary" id="analyzeBtn">Analyze Gap</button>
+      <button class="btn-secondary" id="loadSampleBtn">Load Sample</button>
+      <button class="btn-secondary" id="clearBtn">Clear All</button>
+      <button class="btn-payment" id="payBtn">Pay $9</button>
+    </div>
+    <div class="payment-placeholder-note">
+      Payment integration coming soon
+    </div>
+    
+    <div class="panes">
+      <div class="pane">
+        <div class="pane-header">Resume</div>
+        <textarea id="resumeInput" placeholder="Paste your resume here..."></textarea>
+      </div>
+      <div class="pane">
+        <div class="pane-header">Job Description</div>
+        <textarea id="jobDescInput" placeholder="Paste the job description here..."></textarea>
+      </div>
+    </div>
+    
+    <div id="results" style="display: none;">
+      <div class="stats">
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-label">Missing Keywords</div>
+            <div class="stat-value" id="missingCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Resume Keywords</div>
+            <div class="stat-value" id="resumeCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">JD Keywords</div>
+            <div class="stat-value" id="jobDescCount">0</div>
+          </div>
+        </div>
+        
+        <div class="missing-keywords" id="missingKeywordsSection" style="display: none;">
+          <div class="missing-keywords-title">Missing from Resume:</div>
+          <div class="keyword-list" id="keywordList"></div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 24px;">
+        <div class="pane-header">Job Description (Missing Keywords Highlighted)</div>
+        <div class="output" id="highlightedOutput"></div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>Built by <a href="https://github.com/evan-thedev" target="_blank">Evan Parrott</a> | 
+      <a href="https://github.com/evan-thedev/keyword-gap" target="_blank">View on GitHub</a> | 
+      MIT License</p>
+    </footer>
+  </div>
+  
+  <script src="keywords.js"></script>
+  <script>
+    // Sample data for demo
+    const SAMPLE_RESUME = `John Doe
+Software Engineer
+
+EXPERIENCE
+Senior Developer at Tech Corp (2020-2023)
+- Built web applications using JavaScript and Python
+- Managed team of 3 developers
+- Implemented CI/CD pipelines with Jenkins
+- Worked with MySQL databases
+
+Junior Developer at StartupCo (2018-2020)
+- Developed REST APIs using Node.js
+- Created responsive user interfaces with HTML and CSS
+- Collaborated with product team on feature planning
+
+EDUCATION
+BS Computer Science, State University (2018)
+
+SKILLS
+Programming: JavaScript, Python, HTML, CSS, SQL
+Tools: Git, Jenkins, Docker
+Databases: MySQL, PostgreSQL`;
+
+    const SAMPLE_JOB_DESC = `Full Stack Engineer
+
+We're looking for a talented Full Stack Engineer to join our team.
+
+Requirements:
+- 3+ years experience with JavaScript and TypeScript
+- Strong knowledge of React and Node.js
+- Experience with AWS cloud services
+- Familiarity with microservices architecture
+- Docker and Kubernetes experience
+- Understanding of CI/CD best practices
+- Experience with MongoDB or other NoSQL databases
+- Strong problem-solving skills
+- Excellent communication abilities
+
+Nice to have:
+- GraphQL experience
+- Experience with serverless architecture
+- Knowledge of React Native
+- Previous startup experience
+
+We offer competitive salary, equity, and great benefits.`;
+
+    // DOM elements
+    const resumeInput = document.getElementById('resumeInput');
+    const jobDescInput = document.getElementById('jobDescInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loadSampleBtn = document.getElementById('loadSampleBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const payBtn = document.getElementById('payBtn');
+    const results = document.getElementById('results');
+    const missingCount = document.getElementById('missingCount');
+    const resumeCount = document.getElementById('resumeCount');
+    const jobDescCount = document.getElementById('jobDescCount');
+    const highlightedOutput = document.getElementById('highlightedOutput');
+    const missingKeywordsSection = document.getElementById('missingKeywordsSection');
+    const keywordList = document.getElementById('keywordList');
+    
+    // Event listeners
+    analyzeBtn.addEventListener('click', analyzeGap);
+    loadSampleBtn.addEventListener('click', loadSample);
+    clearBtn.addEventListener('click', clearAll);
+    payBtn.addEventListener('click', handlePayment);
+    
+    // Allow Enter key in textareas (Ctrl+Enter to analyze)
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        analyzeGap();
+      }
+    });
+    
+    function analyzeGap() {
+      const resumeText = resumeInput.value.trim();
+      const jobDescText = jobDescInput.value.trim();
+      
+      if (!resumeText || !jobDescText) {
+        alert('Please enter both resume and job description text.');
+        return;
+      }
+      
+      // Get unique tokens from each text
+      const resumeTokens = getUniqueTokens(resumeText);
+      const jobDescTokens = getUniqueTokens(jobDescText);
+      
+      // Find missing keywords
+      const missing = findMissingKeywords(resumeText, jobDescText);
+      
+      // Update stats
+      missingCount.textContent = missing.length;
+      resumeCount.textContent = resumeTokens.size;
+      jobDescCount.textContent = jobDescTokens.size;
+      
+      // Show/hide missing keywords section
+      if (missing.length > 0) {
+        missingKeywordsSection.style.display = 'block';
+        keywordList.innerHTML = missing
+          .map(kw => `<span class="keyword-tag">${escapeHtml(kw)}</span>`)
+          .join('');
+      } else {
+        missingKeywordsSection.style.display = 'none';
+      }
+      
+      // Highlight missing keywords in job description
+      const highlighted = highlightMissingKeywords(jobDescText, missing);
+      highlightedOutput.innerHTML = highlighted;
+      
+      // Show results
+      results.style.display = 'block';
+      
+      // Scroll to results
+      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function loadSample() {
+      resumeInput.value = SAMPLE_RESUME;
+      jobDescInput.value = SAMPLE_JOB_DESC;
+      analyzeGap();
+    }
+    
+    function clearAll() {
+      resumeInput.value = '';
+      jobDescInput.value = '';
+      results.style.display = 'none';
+    }
+    
+    function handlePayment() {
+      // Placeholder for future payment integration
+      // Bobby will add Stripe/Gumroad URL here
+      alert('Payment integration coming soon! Bobby will connect this to Stripe/Gumroad.');
+    }
+    
+    // Load sample on first visit
+    window.addEventListener('load', () => {
+      if (!resumeInput.value && !jobDescInput.value) {
+        loadSample();
+      }
+    });
+  </script>
+</body>
+</html>
